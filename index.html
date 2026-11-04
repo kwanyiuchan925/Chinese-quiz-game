@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聖保羅書院 175周年校慶・中文科開放日闖關遊戲</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .font-serif-tc { font-family: 'Noto Serif TC', serif; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #b45309 100%);
+        }
+
+        .crimson-gradient {
+            background: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #7f1d1d 100%);
+        }
+
+        .wheel-spin {
+            transition: transform 4.5s cubic-bezier(0.15, 0.99, 0.18, 0.99);
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
+
+    <!-- 主容器 -->
+    <div id="app" class="w-full max-w-4xl min-h-[92vh] glass-panel rounded-3xl overflow-hidden flex flex-col relative">
+
+        <!-- 頂部狀態欄 -->
+        <header id="top-bar" class="hidden bg-slate-900 text-white px-6 py-3 flex justify-between items-center border-b border-slate-700 shadow-lg">
+            <div class="flex items-center space-x-4">
+                <span id="player-display" class="font-bold text-amber-400 text-lg flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 font-normal"></i><span id="p-name">參加者</span>
+                </span>
+                <span id="role-tag" class="bg-indigo-600 text-xs px-2.5 py-1 rounded-full font-bold">學生</span>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <div class="text-center">
+                    <span class="text-xs text-slate-400 block">得分</span>
+                    <span id="score-val" class="text-2xl font-black text-amber-400 font-serif-tc">0</span>
+                </div>
+                <div class="text-center min-w-[60px]">
+                    <span class="text-xs text-slate-400 block">時間</span>
+                    <span id="timer-val" class="text-2xl font-black text-emerald-400 font-mono">15</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要內容區域 -->
+        <main class="flex-1 flex flex-col p-4 sm:p-8 justify-center relative overflow-y-auto no-scrollbar">
+
+            <!-- 1. 歡迎/登入頁面 -->
+            <section id="sec-welcome" class="space-y-6 text-center my-auto">
+                <div class="inline-block p-4 rounded-full bg-amber-500/10 mb-2 animate-pulse-subtle">
+                    <i class="fa-solid fa-graduation-cap text-6xl text-amber-600"></i>
+                </div>
+                <div>
+                    <span class="bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full">175 周年校慶特備活動</span>
+                    <h1 class="text-3xl sm:text-5xl font-black font-serif-tc text-slate-900 mt-2 mb-2">聖保羅書院中文科</h1>
+                    <h2 class="text-xl sm:text-2xl font-bold text-amber-700">開放日知識大闖關</h2>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4 text-left bg-white/70 p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">請輸入姓名：</label>
+                        <input type="text" id="input-name" placeholder="例如：張小明" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:outline-none text-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">參加者身份：</label>
+                        <select id="select-role" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:outline-none text-lg bg-white">
+                            <option value="學生">學生</option>
+                            <option value="校友">校友</option>
+                            <option value="家長">家長</option>
+                            <option value="訪客">訪客</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="startGame()" class="flex-1 py-4 crimson-gradient text-white font-bold text-xl rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center">
+                            開始挑戰 <i class="fa-solid fa-paper-plane ml-2"></i>
+                        </button>
+                        <button onclick="showLeaderboard()" class="px-5 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center">
+                            <i class="fa-solid fa-trophy"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1.5 龍虎榜排行榜頁面 -->
+            <section id="sec-leaderboard" class="hidden space-y-6 text-center my-auto max-w-lg mx-auto w-full">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-2xl sm:text-3xl font-black font-serif-tc text-slate-900 flex items-center">
+                        <i class="fa-solid fa-trophy text-amber-500 mr-2"></i> 開放日英雄龍虎榜
+                    </h2>
+                    <button onclick="showSection('sec-welcome')" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-sm transition-all">
+                        返回首頁
+                    </button>
+                </div>
+
+                <div class="bg-white/90 border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-[380px] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white text-xs uppercase font-mono">
+                                <th class="p-3 text-center w-16">名次</th>
+                                <th class="p-3">姓名 / 身份</th>
+                                <th class="p-3 text-right">得分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 2. 難度選擇頁面 -->
+            <section id="sec-difficulty" class="hidden space-y-6 text-center my-auto">
+                <h2 class="text-2xl sm:text-3xl font-black font-serif-tc text-slate-900">請選擇挑戰難度</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    <button onclick="selectDifficulty('easy')" class="p-6 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left transition-all active:scale-95 shadow-sm">
+                        <span class="text-emerald-700 font-bold text-xs bg-emerald-200 px-2 py-1 rounded">初階（12題選10）</span>
+                        <h3 class="text-xl font-bold text-slate-800 mt-2">基礎知識</h3>
+                        <p class="text-xs text-slate-500 mt-1">簡短有趣的基礎題目，適合快速挑戰！</p>
+                    </button>
+                    <button onclick="selectDifficulty('mid')" class="p-6 bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl text-left transition-all active:scale-95 shadow-sm">
+                        <span class="text-amber-700 font-bold text-xs bg-amber-200 px-2 py-1 rounded">中階（12題選10）</span>
+                        <h3 class="text-xl font-bold text-slate-800 mt-2">細節理解</h3>
+                        <p class="text-xs text-slate-500 mt-1">考察活動與展覽細節，考驗記憶力！</p>
+                    </button>
+                    <button onclick="selectDifficulty('hard')" class="p-6 bg-rose-50 hover:bg-rose-100 border-2 border-rose-400 rounded-2xl text-left transition-all active:scale-95 shadow-sm">
+                        <span class="text-rose-700 font-bold text-xs bg-rose-200 px-2 py-1 rounded">高階（12題選10）</span>
+                        <h3 class="text-xl font-bold text-slate-800 mt-2">深層對應</h3>
+                        <p class="text-xs text-slate-500 mt-1">進階題型與文學對應，爭奪最高榮譽！</p>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 3. 主問答介面 -->
+            <section id="sec-quiz" class="hidden flex-1 flex flex-col justify-between space-y-4">
+                <div class="flex justify-between items-center bg-white/60 p-3 rounded-xl border border-slate-200">
+                    <div class="text-sm font-bold text-slate-600">
+                        題目 <span id="q-curr" class="text-amber-600 font-black text-lg">1</span> / <span id="q-total">10</span>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <button id="btn-p-5050" onclick="usePowerUp('5050')" class="px-3 py-1.5 bg-indigo-50 border border-indigo-300 rounded-lg text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-all active:scale-95 flex items-center">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 50:50 (<span id="cnt-5050">1</span>)
+                        </button>
+                        <button id="btn-p-freeze" onclick="usePowerUp('freeze')" class="px-3 py-1.5 bg-cyan-50 border border-cyan-300 rounded-lg text-cyan-700 text-xs font-bold hover:bg-cyan-100 transition-all active:scale-95 flex items-center">
+                            <i class="fa-solid fa-snowflake mr-1"></i> 凍結時間 (<span id="cnt-freeze">1</span>)
+                        </button>
+                        <button id="btn-p-double" onclick="usePowerUp('double')" class="px-3 py-1.5 bg-amber-50 border border-amber-300 rounded-lg text-amber-700 text-xs font-bold hover:bg-amber-100 transition-all active:scale-95 flex items-center">
+                            <i class="fa-solid fa-bolt mr-1"></i> 雙倍分數 (<span id="cnt-double">1</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200 min-h-[160px] flex items-center">
+                    <h3 id="q-text" class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed font-serif-tc">
+                        題目載入中...
+                    </h3>
+                </div>
+
+                <div id="opts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
+            </section>
+
+            <!-- 4. Mini-Game: 詩詞對聯連線配對 -->
+            <section id="sec-minigame-match" class="hidden flex-1 flex flex-col justify-between space-y-4 my-auto">
+                <div class="text-center">
+                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full">中場特別關卡</span>
+                    <h3 class="text-2xl font-black font-serif-tc text-slate-900 mt-1">盧廣鋒老師 詩聯配對小遊戲</h3>
+                    <p class="text-xs text-slate-500">點選左側題目，再點選右側正確的涵義或出處配對！</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div id="match-left" class="space-y-3"></div>
+                    <div id="match-right" class="space-y-3"></div>
+                </div>
+
+                <div class="text-center pt-2">
+                    <button id="btn-submit-match" onclick="checkMatchGame()" class="px-8 py-3 gold-gradient text-white font-bold rounded-xl shadow hover:brightness-110 active:scale-95">
+                        提交配對
+                    </button>
+                </div>
+            </section>
+
+            <!-- 5. Mini-Game: 隨機多獎品大轉盤 -->
+            <section id="sec-minigame-wheel" class="hidden flex-1 flex flex-col items-center justify-center space-y-6">
+                <div class="text-center">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">幸運獎勵</span>
+                    <h3 class="text-2xl font-black font-serif-tc text-slate-900 mt-1">轉出你的專屬幸運獎賞！</h3>
+                    <p class="text-xs text-slate-500 mt-1">轉盤包含：500分、300分、150分、防護道具等隨機獎勵</p>
+                </div>
+
+                <div class="relative w-64 h-64 sm:w-72 sm:h-72">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-red-600 drop-shadow"></div>
+                    <div id="wheel-disc" class="w-full h-full rounded-full border-4 border-amber-400 shadow-2xl relative overflow-hidden bg-slate-800 wheel-spin flex items-center justify-center">
+                        <div class="absolute inset-0 rounded-full border-8 border-amber-300/30"></div>
+                        <div class="text-white font-bold text-center space-y-1 z-10">
+                            <i class="fa-solid fa-gift text-4xl text-amber-400"></i>
+                            <div class="text-xs text-slate-300">幸運大轉盤</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-spin" onclick="spinWheel()" class="px-8 py-3 crimson-gradient text-white font-bold text-lg rounded-xl shadow-lg hover:brightness-110 active:scale-95">
+                    開始旋轉！
+                </button>
+            </section>
+
+            <!-- 6. 結算頁面 -->
+            <section id="sec-result" class="hidden space-y-6 text-center my-auto">
+                <div class="space-y-2">
+                    <div id="star-rating" class="text-4xl text-amber-400 space-x-1">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <h2 class="text-3xl font-black font-serif-tc text-slate-900">挑戰完成！</h2>
+                    <p class="text-sm text-slate-500">恭喜 <span id="result-user" class="font-bold text-slate-900">參加者</span> 完成 175 周年中文科開放日知識問答</p>
+                </div>
+
+                <div class="max-w-md mx-auto bg-white/90 border border-slate-200 p-6 rounded-3xl shadow-xl space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200">
+                            <span class="text-xs font-bold text-amber-700 block mb-1">最終總得分</span>
+                            <span id="final-score" class="text-3xl font-black text-amber-600 font-serif-tc">0</span>
+                        </div>
+                        <div class="bg-indigo-50/80 p-4 rounded-2xl border border-indigo-200">
+                            <span class="text-xs font-bold text-indigo-700 block mb-1">榮譽稱號</span>
+                            <span id="final-title" class="text-base font-bold text-indigo-900 block mt-1">翰林學士</span>
+                        </div>
+                    </div>
+                    <div id="rank-notice" class="bg-emerald-50 text-emerald-800 text-xs font-bold p-3 rounded-xl border border-emerald-200 hidden">
+                        🎉 太厲害了！你的成績已成功登入本日開放日龍虎榜！
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
+                    <button onclick="showLeaderboard()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow active:scale-95 transition-all">
+                        <i class="fa-solid fa-trophy mr-1"></i> 查看龍虎榜
+                    </button>
+                    <button onclick="resetGame()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow active:scale-95 transition-all">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> 再次挑戰
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 遊戲邏輯腳本 -->
+    <script>
+        const QUESTION_BANK = {
+            easy: [
+                { q: "聖保羅書院中國語文科的主題橫幅設計中，四大核心方向不包括以下哪一項？", opts: ["閱讀", "競技", "創作", "傳承"], ans: 1 },
+                { q: "聯校文學講座的副題為「從古典思想到香港文化・從城市閱讀到青年創作」，共舉辦了多少場講座？", opts: ["三場", "四場", "五場", "六場"], ans: 2 },
+                { q: "第一場講座「似水流年——漫談香港流行曲七十年」，主講嘉賓為朱耀偉教授與哪一位知名歌手？", opts: ["陳奕迅先生", "張敬軒先生", "黃耀明先生", "林夕先生"], ans: 1 },
+                { q: "第二場講座「孟子的抉擇————仁者無所懼」，是由哪一位教授主講？", opts: ["潘銘基教授", "鄭培凱教授", "何吉賢博士", "梁嘉茵博士"], ans: 0 },
+                { q: "第三場講座「蘇東坡的瀟灑人生」，是由哪一位教授主講？", opts: ["朱耀偉教授", "潘銘基教授", "鄭培凱教授", "何吉賢博士"], ans: 2 },
+                { q: "第四場講座「長夜有聲——香港流行曲的唱與作」，主講嘉賓 Serrini 的中文名字是？", opts: ["梁嘉茵博士", "何吉賢博士", "盧廣鋒老師", "胡燕青女士"], ans: 0 },
+                { q: "第五場講座屬於「川流計劃」，由何吉賢博士主講，主題圍繞哪一位文學家的世界文學圖景？", opts: ["魯迅", "巴金", "老舍", "沈從文"], ans: 2 },
+                { q: "盧廣鋒老師曾任聖保羅書院的甚麼職位？", opts: ["校長", "中國歷史科前主任、學生會總顧問老師", "副校長兼中文科主任", "訓導主任兼圖書館館長"], ans: 1 },
+                { q: "學校適逢甚麼重要日子，令盧廣鋒老師特別為中國語文科賦詩，為中國歷史科撰聯？", opts: ["150周年校慶", "160周年校慶", "175周年校慶", "180周年校慶"], ans: 2 },
+                { q: "由香港中文大學推行、為期兩年並於中一及中二進行的中國語文教學計劃是甚麼？", opts: ["人工智能寫作計劃", "「觸境生情」虛擬實境中國語文教學計劃", "沉浸式古文朗誦計劃", "跨學科歷史VR考察計劃"], ans: 1 },
+                { q: "聖保羅書院中文科橫幅展示的主題口號中，宣傳了「從古典思想到香港文化」以及什麼？", opts: ["從歷史回顧到未來發展", "從城市閱讀到青年創作", "從課堂閱讀到全球視野", "從校園生活到社區活化"], ans: 1 },
+                { q: "在橫幅最下方標示的展覽名稱為何？", opts: ["175周年校慶・中文科成果展示", "聖保羅書院中文科公開開放日", "中西區聯校文學成果展", "175周年校慶・師生創作展"], ans: 0 }
+            ],
+            mid: [
+                { q: "在「似水流年——漫談香港流行曲七十年」講座中，其重點不包括以下哪一項？", opts: ["粵語流行曲的興起與衰微", "香港文化身份與城市記憶", "電影與流行曲的關係", "古代詩詞對現代流行曲的影響"], ans: 3 },
+                { q: "潘銘基教授主講的「仁者無所懼」重點探討仁義與王道，理解其核心精神與甚麼息息相關？", opts: ["經濟發展", "當代意義", "科技創新", "國際貿易"], ans: 1 },
+                { q: "在關於蘇東坡的講座中，特別提及了理解其人生智慧的哪一首著名作品？", opts: ["《赤壁賦》", "《定風波》", "《念奴嬌・赤壁懷古》", "《水調歌頭》"], ans: 1 },
+                { q: "第四場講座「長夜有聲」中，探討青年創作者如何透過甚麼來表達自我？", opts: ["繪畫", "音樂", "舞蹈", "戲劇"], ans: 1 },
+                { q: "何吉賢博士主講的內容涵蓋老舍作品，旨在理解中國現代文學如何走向哪裡？", opts: ["高峰", "世界文學", "校園", "歷史"], ans: 1 },
+                { q: "盧廣鋒老師於甚麼時候榮休，並在本校服務了多少年？", opts: ["2000年服務30年", "2005年服務37年8個月", "2010年服務40年", "2015年服務35年"], ans: 1 },
+                { q: "聯校小作家計劃中，除了香港教育大學的施傳講先生外，另一位指導作家是誰？", opts: ["西西女士", "鍾玲玲女士", "胡燕青女士", "董橋先生"], ans: 2 },
+                { q: "聖保羅書院中文科舉辦的中上環城市閱讀及寫作考察，共劃分為多少條路線？", opts: ["兩條", "三條", "四條", "五條"], ans: 2 },
+                { q: "以下哪一項不是中上環城市閱讀及寫作考察所涵蓋的路線主題？", opts: ["早期華人社會與信仰", "殖民歷史與法治起源", "資訊科技與智慧城市", "城市規劃與生活痕跡"], ans: 2 },
+                { q: "在《樂遊香港文化》問答比賽中，聖保羅書院勇奪冠軍外，還獲得了甚麼獎項？", opts: ["中學組最積極參與獎", "最佳學校團體獎", "卓越推廣大獎", "最具創意表現獎"], ans: 0 },
+                { q: "在「觸境生情」虛擬實境中國語文教學計劃中，學生主要是透過 VR 技術觀察甚麼來蒐集寫作素材？", opts: ["全華人歷史古蹟", "香港都市地景", "自然生態保護區", "宇宙星空景觀"], ans: 1 },
+                { q: "中上環考察的文宣活動簡介中提到：「不是參觀打卡，而是用雙眼理解香港的過去與現在。過去從未離去，只是——」", opts: ["漸漸被人遺忘", "換了方式，繼續留在我們身邊", "變成歷史書上的文字", "成為建築物的痕跡"], ans: 1 }
+            ],
+            hard: [
+                { q: "盧廣鋒老師詩句中「若鑒清」一句，取意自哪一位歷史人物的詩作《觀書有感》？", opts: ["李白", "蘇軾", "朱熹", "王安石"], ans: 2 },
+                { q: "盧老師詩作註解中提到「中」字是指甚麼的精神？", opts: ["中國", "中庸之「中」，表示至正無偏", "中間", "核心"], ans: 1 },
+                { q: "盧廣鋒老師對聯「中為定向心須正，史貴求真識要高」中的「識」字，在註解中明確是指什麼？", opts: ["見識廣博", "判斷力的意思，非謂「見識」", "知識積累", "識字能力"], ans: 1 },
+                { q: "在「全港即興創意寫作比賽」2024至2025年度中，進入最後十強的學生不包括以下哪一位？", opts: ["陳肇珩", "何泓希", "任晉聲", "張天朗"], ans: 3 },
+                { q: "在第五十七屆聯校中文辯論冠軍賽中，上陣的四位辯員不包括下列哪一位？", opts: ["余寯齊", "盧家熙", "梁柏熙", "李易謙"], ans: 3 },
+                { q: "第二屆「明辯論醫」全港中小學生中醫藥辯論比賽總決賽中，聖保羅書院隊長是哪一位學生？", opts: ["傅泰元", "李易謙", "鄺柏玄", "區栢僑"], ans: 0 },
+                { q: "在「全港華文雙語菁英問答比賽」中，聖保羅書院代表隊奪得甚麼獎項？", opts: ["冠軍", "亞軍", "季軍", "殿軍"], ans: 2 },
+                { q: "在「城市・光影・絮語」明信片設計比賽中，獲得雙冠軍的學生楊橋，其作品名稱為何？", opts: ["《無題》", "《正義女神》", "《影隨心轉》", "《古蹟情懷》"], ans: 0 },
+                { q: "另一位獲得「城市・光影・絮語」明信片設計比賽雙冠軍的學生戴俊彥，其作品名稱為何？", opts: ["《無題》", "《影隨心轉》", "《聖約翰座堂那不一樣的天空》", "《正義女神》"], ans: 1 },
+                { q: "獲得「城市・光影・絮語」明信片比賽雙季軍的學生林子申，其參賽作品名稱為何？", opts: ["《無題》", "《影隨心轉》", "《聖約翰座堂那不一樣的天空》", "《正義女神》"], ans: 3 },
+                { q: "獲得「城市・光影・絮語」明信片比賽雙季軍的學生曾灤軒，其參賽作品名稱為何？", opts: ["《無題》", "《影隨心轉》", "《聖約翰座堂那不一樣的天空》", "《正義女神》"], ans: 2 },
+                { q: "聖保羅書院中文科橫幅宣傳主題的副題中，最後一部分提到「從城市閱讀到——」甚麼？", opts: ["青年創作", "社區活化", "歷史傳承", "文藝復興"], ans: 0 }
+            ]
+        };
+
+        const MATCH_GAME_DATA = [
+            { id: 1, left: "若鑒清", right: "取意朱熹《觀書有感》「半畝方塘一鑒開」" },
+            { id: 2, left: "中為定向心須正", right: "指「中庸」之「中」，表示至正無偏" },
+            { id: 3, left: "史貴求真識要高", right: "指「識見」，即判斷力" }
+        ];
+
+        let gameState = {
+            playerName: "參加者",
+            playerRole: "學生",
+            difficulty: "easy",
+            questions: [],
+            currIndex: 0,
+            score: 0,
+            timer: null,
+            timeLeft: 15,
+            isFrozen: false,
+            multiplier: 1,
+            powerUps: { '5050': 1, freeze: 1, double: 1 }
+        };
+
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.setValueAtTime(174.61, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                }
+            } catch (e) {}
+        }
+
+        function showSection(secId) {
+            ['sec-welcome', 'sec-leaderboard', 'sec-difficulty', 'sec-quiz', 'sec-minigame-match', 'sec-minigame-wheel', 'sec-result'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(secId).classList.remove('hidden');
+
+            const topBar = document.getElementById('top-bar');
+            if (secId === 'sec-welcome' || secId === 'sec-result' || secId === 'sec-leaderboard') {
+                topBar.classList.add('hidden');
+            } else {
+                topBar.classList.remove('hidden');
+            }
+        }
+
+        function startGame() {
+            const name = document.getElementById('input-name').value.trim();
+            if (name) gameState.playerName = name;
+            gameState.playerRole = document.getElementById('select-role').value;
+
+            document.getElementById('p-name').innerText = gameState.playerName;
+            document.getElementById('role-tag').innerText = gameState.playerRole;
+
+            showSection('sec-difficulty');
+        }
+
+        function saveScoreToLeaderboard(name, role, score) {
+            let leaderboard = JSON.parse(localStorage.getItem('st_paul_leaderboard') || '[]');
+            leaderboard.push({ name, role, score, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('st_paul_leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function showLeaderboard() {
+            showSection('sec-leaderboard');
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            let leaderboard = JSON.parse(localStorage.getItem('st_paul_leaderboard') || '[]');
+
+            if (leaderboard.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400">暫無記錄，快來挑戰第一名！</td></tr>`;
+                return;
+            }
+
+            leaderboard.forEach((item, index) => {
+                let rankBadge = `<span class="font-mono font-bold text-slate-600">${index + 1}</span>`;
+                if (index === 0) rankBadge = `<span class="bg-amber-400 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow">🥇 1</span>`;
+                else if (index === 1) rankBadge = `<span class="bg-slate-300 text-slate-800 px-2 py-0.5 rounded-full text-xs font-bold">🥈 2</span>`;
+                else if (index === 2) rankBadge = `<span class="bg-amber-700/60 text-white px-2 py-0.5 rounded-full text-xs font-bold">🥉 3</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50';
+                tr.innerHTML = `
+                    <td class="p-3 text-center">${rankBadge}</td>
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800">${item.name}</div>
+                        <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">${item.role}</span>
+                    </td>
+                    <td class="p-3 text-right font-black text-amber-600 font-serif-tc text-lg">${item.score}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selectDifficulty(diff) {
+            gameState.difficulty = diff;
+            const pool = [...QUESTION_BANK[diff]];
+            gameState.questions = pool.sort(() => Math.random() - 0.5).slice(0, 10);
+            gameState.currIndex = 0;
+            gameState.score = 0;
+            gameState.powerUps = { '5050': 1, freeze: 1, double: 1 };
+            
+            updatePowerUpUI();
+            updateScoreUI();
+            showSection('sec-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(gameState.timer);
+            gameState.timeLeft = 15;
+            gameState.isFrozen = false;
+            gameState.multiplier = 1;
+
+            const qData = gameState.questions[gameState.currIndex];
+            document.getElementById('q-curr').innerText = gameState.currIndex + 1;
+            document.getElementById('q-total').innerText = gameState.questions.length;
+            document.getElementById('q-text').innerText = qData.q;
+
+            const grid = document.getElementById('opts-grid');
+            grid.innerHTML = '';
+
+            qData.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn w-full p-4 bg-slate-50 hover:bg-amber-50 border-2 border-slate-200 hover:border-amber-400 rounded-xl text-left font-bold text-slate-800 transition-all active:scale-95 text-base sm:text-lg flex items-center shadow-sm';
+                btn.innerHTML = `<span class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center mr-3 font-mono text-sm font-black">${String.fromCharCode(65 + idx)}</span> <span class="flex-1">${opt}</span>`;
+                btn.onclick = () => checkAnswer(idx);
+                grid.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            document.getElementById('timer-val').innerText = gameState.timeLeft;
+            gameState.timer = setInterval(() => {
+                if (!gameState.isFrozen) {
+                    gameState.timeLeft--;
+                    document.getElementById('timer-val').innerText = gameState.timeLeft;
+                    if (gameState.timeLeft <= 0) {
+                        clearInterval(gameState.timer);
+                        checkAnswer(-1);
+                    }
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(selectedIdx) {
+            clearInterval(gameState.timer);
+            const qData = gameState.questions[gameState.currIndex];
+            const btns = document.querySelectorAll('.opt-btn');
+
+            if (selectedIdx === qData.ans) {
+                playSound('correct');
+                if (selectedIdx >= 0 && btns[selectedIdx]) {
+                    btns[selectedIdx].classList.remove('bg-slate-50', 'border-slate-200');
+                    btns[selectedIdx].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                }
+                const gained = (100 + gameState.timeLeft * 10) * gameState.multiplier;
+                gameState.score += gained;
+                updateScoreUI();
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+            } else {
+                playSound('wrong');
+                if (selectedIdx >= 0 && btns[selectedIdx]) {
+                    btns[selectedIdx].classList.remove('bg-slate-50', 'border-slate-200');
+                    btns[selectedIdx].classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+                }
+                if (btns[qData.ans]) {
+                    btns[qData.ans].classList.add('bg-emerald-100', 'border-emerald-500');
+                }
+            }
+
+            setTimeout(() => {
+                gameState.currIndex++;
+                if (gameState.currIndex === 3) {
+                    startMatchGame();
+                } else if (gameState.currIndex === 6) {
+                    startWheelGame();
+                } else if (gameState.currIndex < gameState.questions.length) {
+                    loadQuestion();
+                } else {
+                    endGame();
+                }
+            }, 1200);
+        }
+
+        function usePowerUp(type) {
+            if (gameState.powerUps[type] <= 0) return;
+            gameState.powerUps[type]--;
+            updatePowerUpUI();
+
+            if (type === '5050') {
+                const qData = gameState.questions[gameState.currIndex];
+                const btns = document.querySelectorAll('.opt-btn');
+                let wrongIndices = [];
+                qData.opts.forEach((_, idx) => {
+                    if (idx !== qData.ans) wrongIndices.push(idx);
+                });
+                wrongIndices.sort(() => Math.random() - 0.5).slice(0, 2).forEach(idx => {
+                    btns[idx].style.visibility = 'hidden';
+                });
+            } else if (type === 'freeze') {
+                gameState.isFrozen = true;
+                document.getElementById('timer-val').classList.add('text-cyan-400');
+            } else if (type === 'double') {
+                gameState.multiplier = 2;
+            }
+        }
+
+        function updatePowerUpUI() {
+            document.getElementById('cnt-5050').innerText = gameState.powerUps['5050'];
+            document.getElementById('cnt-freeze').innerText = gameState.powerUps['freeze'];
+            document.getElementById('cnt-double').innerText = gameState.powerUps['double'];
+        }
+
+        function updateScoreUI() {
+            document.getElementById('score-val').innerText = gameState.score;
+        }
+
+        let selectedLeft = null;
+        let userMatches = {};
+
+        function startMatchGame() {
+            showSection('sec-minigame-match');
+            const leftContainer = document.getElementById('match-left');
+            const rightContainer = document.getElementById('match-right');
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+            userMatches = {};
+
+            const shuffledRight = [...MATCH_GAME_DATA].sort(() => Math.random() - 0.5);
+
+            MATCH_GAME_DATA.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'match-left-item p-3 bg-white border-2 border-slate-200 rounded-xl font-bold text-center cursor-pointer transition-all text-sm';
+                div.innerText = item.left;
+                div.onclick = () => selectLeftItem(div, item.id);
+                leftContainer.appendChild(div);
+            });
+
+            shuffledRight.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'match-right-item p-3 bg-white border-2 border-slate-200 rounded-xl text-xs font-medium cursor-pointer transition-all';
+                div.innerText = item.right;
+                div.onclick = () => selectRightItem(div, item.id);
+                rightContainer.appendChild(div);
+            });
+        }
+
+        function selectLeftItem(el, id) {
+            document.querySelectorAll('.match-left-item').forEach(i => i.classList.remove('border-amber-500', 'bg-amber-50'));
+            el.classList.add('border-amber-500', 'bg-amber-50');
+            selectedLeft = id;
+        }
+
+        function selectRightItem(el, id) {
+            if (!selectedLeft) return;
+            userMatches[selectedLeft] = id;
+            el.classList.add('border-indigo-500', 'bg-indigo-50');
+            selectedLeft = null;
+            document.querySelectorAll('.match-left-item').forEach(i => i.classList.remove('border-amber-500', 'bg-amber-50'));
+        }
+
+        function checkMatchGame() {
+            let correctCount = 0;
+            MATCH_GAME_DATA.forEach(item => {
+                if (userMatches[item.id] === item.id) correctCount++;
+            });
+
+            const bonus = correctCount * 150;
+            gameState.score += bonus;
+            updateScoreUI();
+            alert(`配對完成！答對 ${correctCount} 組，獲得 ${bonus} 額外得分！`);
+
+            showSection('sec-quiz');
+            loadQuestion();
+        }
+
+        function startWheelGame() {
+            showSection('sec-minigame-wheel');
+        }
+
+        function spinWheel() {
+            const btn = document.getElementById('btn-spin');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            const disc = document.getElementById('wheel-disc');
+            const randomDeg = 1800 + Math.floor(Math.random() * 360);
+            disc.style.transform = `rotate(${randomDeg}deg)`;
+
+            const prizes = [
+                { type: 'score', val: 500, text: '🎉 恭喜抽中 500 分大獎！' },
+                { type: 'score', val: 300, text: '⭐ 恭喜抽中 300 分獎賞！' },
+                { type: 'score', val: 150, text: '✨ 獲得 150 分鼓勵獎！' },
+                { type: 'power', key: '5050', text: '🛡️ 獲得額外「50:50 避雷針」道具一次！' },
+                { type: 'power', key: 'freeze', text: '❄️ 獲得額外「時間凍結」道具一次！' }
+            ];
+            const won = prizes[Math.floor(Math.random() * prizes.length)];
+
+            setTimeout(() => {
+                playSound('correct');
+                confetti({ particleCount: 90, spread: 80 });
+
+                if (won.type === 'score') {
+                    gameState.score += won.val;
+                } else if (won.type === 'power') {
+                    gameState.powerUps[won.key]++;
+                    updatePowerUpUI();
+                }
+                updateScoreUI();
+
+                alert(won.text);
+
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                showSection('sec-quiz');
+                loadQuestion();
+            }, 4600);
+        }
+
+        function endGame() {
+            showSection('sec-result');
+            confetti({ particleCount: 120, spread: 100, origin: { y: 0.6 } });
+
+            document.getElementById('result-user').innerText = `${gameState.playerName}（${gameState.playerRole}）`;
+            document.getElementById('final-score').innerText = gameState.score;
+
+            let title = "中文學人";
+            if (gameState.score >= 1200) title = "翰林學士 (狀元)";
+            else if (gameState.score >= 800) title = "榜眼才子";
+            else if (gameState.score >= 500) title = "探花秀才";
+            document.getElementById('final-title').innerText = title;
+
+            saveScoreToLeaderboard(gameState.playerName, gameState.playerRole, gameState.score);
+            document.getElementById('rank-notice').classList.remove('hidden');
+        }
+
+        function resetGame() {
+            showSection('sec-welcome');
+        }
+    </script>
+</body>
+</html>
