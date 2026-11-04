@@ -135,7 +135,7 @@
                         <thead>
                             <tr class="bg-slate-900 text-white text-xs uppercase font-mono">
                                 <th class="p-3 text-center w-16">名次</th>
-                                <th class="p-3">姓名 / 身份</th>
+                                <th class="p-3">參加者 / 稱號等級</th>
                                 <th class="p-3 text-right">得分</th>
                             </tr>
                         </thead>
@@ -200,7 +200,7 @@
                 <div class="text-center">
                     <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full">中場特別關卡</span>
                     <h3 class="text-2xl font-black font-serif-tc text-slate-900 mt-1">盧廣鋒老師 詩聯配對小遊戲</h3>
-                    <p class="text-xs text-slate-500">點選左側題目，再點選右側正確的涵義或出處配對！</p>
+                    <p class="text-xs text-slate-500">請依序點選左側詩句，再點選右側對應的正確涵義完成配對！</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -215,21 +215,29 @@
                 </div>
             </section>
 
-            <!-- 5. Mini-Game: 隨機多獎品大轉盤 -->
-            <section id="sec-minigame-wheel" class="hidden flex-1 flex flex-col items-center justify-center space-y-6">
+            <!-- 5. Mini-Game: 隨機多獎品大轉盤 (附帶清楚獎勵註明) -->
+            <section id="sec-minigame-wheel" class="hidden flex-1 flex flex-col items-center justify-center space-y-5">
                 <div class="text-center">
                     <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">幸運獎勵</span>
                     <h3 class="text-2xl font-black font-serif-tc text-slate-900 mt-1">轉出你的專屬幸運獎賞！</h3>
-                    <p class="text-xs text-slate-500 mt-1">轉盤包含：500分、300分、150分、防護道具等隨機獎勵</p>
                 </div>
 
-                <div class="relative w-64 h-64 sm:w-72 sm:h-72">
+                <!-- 轉盤下方/上方加註獎品清單 -->
+                <div class="flex flex-wrap justify-center gap-2 max-w-md text-xs font-bold text-slate-600 bg-white/70 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                    <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded">🎁 500分大獎</span>
+                    <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded">⭐ 300分獎賞</span>
+                    <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded">✨ 150分鼓勵</span>
+                    <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">🛡️ 50:50道具</span>
+                    <span class="bg-cyan-100 text-cyan-800 px-2 py-1 rounded">❄️ 凍結時間</span>
+                </div>
+
+                <div class="relative w-56 h-56 sm:w-64 sm:h-64">
                     <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-red-600 drop-shadow"></div>
                     <div id="wheel-disc" class="w-full h-full rounded-full border-4 border-amber-400 shadow-2xl relative overflow-hidden bg-slate-800 wheel-spin flex items-center justify-center">
                         <div class="absolute inset-0 rounded-full border-8 border-amber-300/30"></div>
-                        <div class="text-white font-bold text-center space-y-1 z-10">
-                            <i class="fa-solid fa-gift text-4xl text-amber-400"></i>
-                            <div class="text-xs text-slate-300">幸運大轉盤</div>
+                        <div class="text-white font-bold text-center space-y-1 z-10 p-4">
+                            <i class="fa-solid fa-gift text-3xl text-amber-400"></i>
+                            <div class="text-xs text-amber-200">點擊下方按鈕開始轉動！</div>
                         </div>
                     </div>
                 </div>
@@ -259,7 +267,7 @@
                         </div>
                         <div class="bg-indigo-50/80 p-4 rounded-2xl border border-indigo-200">
                             <span class="text-xs font-bold text-indigo-700 block mb-1">榮譽稱號</span>
-                            <span id="final-title" class="text-base font-bold text-indigo-900 block mt-1">翰林學士</span>
+                            <span id="final-title" class="text-sm font-bold text-indigo-900 block mt-1">翰林學士</span>
                         </div>
                     </div>
                     <div id="rank-notice" class="bg-emerald-50 text-emerald-800 text-xs font-bold p-3 rounded-xl border border-emerald-200 hidden">
@@ -316,7 +324,7 @@
                 { q: "盧老師詩作註解中提到「中」字是指甚麼的精神？", opts: ["中國", "中庸之「中」，表示至正無偏", "中間", "核心"], ans: 1 },
                 { q: "盧廣鋒老師對聯「中為定向心須正，史貴求真識要高」中的「識」字，在註解中明確是指什麼？", opts: ["見識廣博", "判斷力的意思，非謂「見識」", "知識積累", "識字能力"], ans: 1 },
                 { q: "在「全港即興創意寫作比賽」2024至2025年度中，進入最後十強的學生不包括以下哪一位？", opts: ["陳肇珩", "何泓希", "任晉聲", "張天朗"], ans: 3 },
-                { q: "在第五十七屆聯校中文辯論冠軍賽中，上陣的四位辯員不包括下列哪一位？", opts: ["余寯齊", "盧家熙", "梁柏熙", "李易謙"], ans: 3 },
+                { q: "在第五十七屆聯校中文辯論冠軍賽中，上陣的四位辯員不包括下列哪一位？", opts: ["余寯齊", "盧家熙", "梁柏熙", "黎明"], ans: 3 },
                 { q: "第二屆「明辯論醫」全港中小學生中醫藥辯論比賽總決賽中，聖保羅書院隊長是哪一位學生？", opts: ["傅泰元", "李易謙", "鄺柏玄", "區栢僑"], ans: 0 },
                 { q: "在「全港華文雙語菁英問答比賽」中，聖保羅書院代表隊奪得甚麼獎項？", opts: ["冠軍", "亞軍", "季軍", "殿軍"], ans: 2 },
                 { q: "在「城市・光影・絮語」明信片設計比賽中，獲得雙冠軍的學生楊橋，其作品名稱為何？", opts: ["《無題》", "《正義女神》", "《影隨心轉》", "《古蹟情懷》"], ans: 0 },
@@ -346,6 +354,15 @@
             multiplier: 1,
             powerUps: { '5050': 1, freeze: 1, double: 1 }
         };
+
+        function getTitleByScore(score) {
+            if (score >= 2000) return "翰林學士 (殿試狀元)";
+            if (score >= 1600) return "榜眼才子 (文壇棟樑)";
+            if (score >= 1200) return "探花秀才 (文學俊彥)";
+            if (score >= 800)  return "進士及第 (博學多才)";
+            if (score >= 400)  return "舉人登科 (才思敏捷)";
+            return "秀才初試 (初露鋒芒)";
+        }
 
         function playSound(type) {
             try {
@@ -398,9 +415,9 @@
             showSection('sec-difficulty');
         }
 
-        function saveScoreToLeaderboard(name, role, score) {
+        function saveScoreToLeaderboard(name, role, score, title) {
             let leaderboard = JSON.parse(localStorage.getItem('st_paul_leaderboard') || '[]');
-            leaderboard.push({ name, role, score, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+            leaderboard.push({ name, role, score, title, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
             leaderboard.sort((a, b) => b.score - a.score);
             leaderboard = leaderboard.slice(0, 10);
             localStorage.setItem('st_paul_leaderboard', JSON.stringify(leaderboard));
@@ -429,8 +446,8 @@
                 tr.innerHTML = `
                     <td class="p-3 text-center">${rankBadge}</td>
                     <td class="p-3">
-                        <div class="font-bold text-slate-800">${item.name}</div>
-                        <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">${item.role}</span>
+                        <div class="font-bold text-slate-800">${item.name} <span class="text-xs font-normal text-slate-500">(${item.role})</span></div>
+                        <div class="text-xs text-indigo-700 font-bold mt-0.5"><i class="fa-solid fa-award mr-1"></i>${item.title || '翰林學士'}</div>
                     </td>
                     <td class="p-3 text-right font-black text-amber-600 font-serif-tc text-lg">${item.score}</td>
                 `;
@@ -564,7 +581,8 @@
             document.getElementById('score-val').innerText = gameState.score;
         }
 
-        let selectedLeft = null;
+        // 修正後的配對題邏輯 (支援完整三組連線配對)
+        let selectedLeftId = null;
         let userMatches = {};
 
         function startMatchGame() {
@@ -573,6 +591,7 @@
             const rightContainer = document.getElementById('match-right');
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
+            selectedLeftId = null;
             userMatches = {};
 
             const shuffledRight = [...MATCH_GAME_DATA].sort(() => Math.random() - 0.5);
@@ -581,6 +600,7 @@
                 const div = document.createElement('div');
                 div.className = 'match-left-item p-3 bg-white border-2 border-slate-200 rounded-xl font-bold text-center cursor-pointer transition-all text-sm';
                 div.innerText = item.left;
+                div.dataset.id = item.id;
                 div.onclick = () => selectLeftItem(div, item.id);
                 leftContainer.appendChild(div);
             });
@@ -589,23 +609,42 @@
                 const div = document.createElement('div');
                 div.className = 'match-right-item p-3 bg-white border-2 border-slate-200 rounded-xl text-xs font-medium cursor-pointer transition-all';
                 div.innerText = item.right;
+                div.dataset.id = item.id;
                 div.onclick = () => selectRightItem(div, item.id);
                 rightContainer.appendChild(div);
             });
         }
 
         function selectLeftItem(el, id) {
-            document.querySelectorAll('.match-left-item').forEach(i => i.classList.remove('border-amber-500', 'bg-amber-50'));
-            el.classList.add('border-amber-500', 'bg-amber-50');
-            selectedLeft = id;
+            document.querySelectorAll('.match-left-item').forEach(i => {
+                if(!i.classList.contains('matched')) i.classList.remove('border-amber-500', 'bg-amber-50');
+            });
+            if (!el.classList.contains('matched')) {
+                el.classList.add('border-amber-500', 'bg-amber-50');
+                selectedLeftId = id;
+            }
         }
 
-        function selectRightItem(el, id) {
-            if (!selectedLeft) return;
-            userMatches[selectedLeft] = id;
-            el.classList.add('border-indigo-500', 'bg-indigo-50');
-            selectedLeft = null;
-            document.querySelectorAll('.match-left-item').forEach(i => i.classList.remove('border-amber-500', 'bg-amber-50'));
+        function selectRightItem(rightEl, rightId) {
+            if (!selectedLeftId) {
+                alert('請先點選左側的詩句！');
+                return;
+            }
+
+            userMatches[selectedLeftId] = rightId;
+
+            // 標記左側與右側已配對
+            const leftEl = document.querySelector(`.match-left-item[data-id="${selectedLeftId}"]`);
+            if (leftEl) {
+                leftEl.classList.remove('border-amber-500', 'bg-amber-50');
+                leftEl.classList.add('border-emerald-500', 'bg-emerald-50', 'matched');
+                leftEl.style.pointerEvents = 'none';
+            }
+
+            rightEl.classList.add('border-emerald-500', 'bg-emerald-50', 'matched');
+            rightEl.style.pointerEvents = 'none';
+
+            selectedLeftId = null;
         }
 
         function checkMatchGame() {
@@ -617,7 +656,7 @@
             const bonus = correctCount * 150;
             gameState.score += bonus;
             updateScoreUI();
-            alert(`配對完成！答對 ${correctCount} 組，獲得 ${bonus} 額外得分！`);
+            alert(`配對完成！成功配對 ${correctCount} 組，獲得 ${bonus} 額外得分！`);
 
             showSection('sec-quiz');
             loadQuestion();
@@ -637,8 +676,8 @@
             disc.style.transform = `rotate(${randomDeg}deg)`;
 
             const prizes = [
-                { type: 'score', val: 500, text: '🎉 恭喜抽中 500 分大獎！' },
-                { type: 'score', val: 300, text: '⭐ 恭喜抽中 300 分獎賞！' },
+                { type: 'score', val: 500, text: '🎉 恭喜幸運抽中 500 分大獎！' },
+                { type: 'score', val: 300, text: '⭐ 恭喜幸運抽中 300 分獎賞！' },
                 { type: 'score', val: 150, text: '✨ 獲得 150 分鼓勵獎！' },
                 { type: 'power', key: '5050', text: '🛡️ 獲得額外「50:50 避雷針」道具一次！' },
                 { type: 'power', key: 'freeze', text: '❄️ 獲得額外「時間凍結」道具一次！' }
@@ -673,13 +712,10 @@
             document.getElementById('result-user').innerText = `${gameState.playerName}（${gameState.playerRole}）`;
             document.getElementById('final-score').innerText = gameState.score;
 
-            let title = "中文學人";
-            if (gameState.score >= 1200) title = "翰林學士 (狀元)";
-            else if (gameState.score >= 800) title = "榜眼才子";
-            else if (gameState.score >= 500) title = "探花秀才";
+            const title = getTitleByScore(gameState.score);
             document.getElementById('final-title').innerText = title;
 
-            saveScoreToLeaderboard(gameState.playerName, gameState.playerRole, gameState.score);
+            saveScoreToLeaderboard(gameState.playerName, gameState.playerRole, gameState.score, title);
             document.getElementById('rank-notice').classList.remove('hidden');
         }
 
